@@ -27,10 +27,11 @@ namespace cAlgo
  
         public IndicatorDataSeries ThrustCandle { get; set; }
         public IndicatorDataSeries ThrustSwitch { get; set; }
+        private int _lastThrust;
 
         protected override void Initialize()
         {
-            // Initialization logic can be added here if needed in the future.
+            _lastThrust = 0;
         }
 
         private bool IsStrongBullish(int index)
@@ -72,12 +73,45 @@ namespace cAlgo
             if (currentClose > currentOpen) // Bullish candle
             {
                 bool isStrong = IsStrongBullish(index);
-                Chart.SetBarColor(index, isStrong ? StrongBullishColor : WeakBullishColor);
+                if (isStrong)
+                {
+                    Chart.SetBarColor(index, StrongBullishColor);
+                    ThrustCandle[index] = 1;
+
+                    if (_lastThrust == -1)
+                    {
+                        ThrustSwitch[index] = 1;
+                        _lastThrust = 1;
+                    }
+                    
+
+                }
+                else
+                {
+                    Chart.SetBarColor(index, WeakBullishColor);
+                    ThrustCandle[index] = 0;
+                }
             }
             else if (currentClose < currentOpen) // Bearish candle
             {
                 bool isStrong = IsStrongBearish(index);
-                Chart.SetBarColor(index, isStrong ? StrongBearishColor : WeakBearishColor);
+                if (isStrong)
+                {
+                    Chart.SetBarColor(index, StrongBearishColor);
+                    ThrustCandle[index] = -1;
+
+                    if (_lastThrust == 1)
+                    {
+                        ThrustSwitch[index] = -1;
+                        _lastThrust = -1;
+                    }
+                    
+                }
+                else
+                {
+                    Chart.SetBarColor(index, WeakBearishColor);
+                    ThrustCandle[index] = -1;
+                }
             }
             // If currentClose == currentOpen (Doji or neutral candle), color is not changed.
         }

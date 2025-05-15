@@ -8,6 +8,8 @@ This indicator for cTrader identifies "thrust" candles and colors them based on 
 -   **Bearish Thrust:** A bearish candle is considered a "strong" thrust if its closing price is lower than the low prices of the `Look Back Candles` number of preceding candles. Otherwise, it's considered a "weak" bearish candle.
 -   **Neutral Candles:** If a candle's open and close prices are the same (e.g., a Doji), its color is not changed by this indicator.
 
+A private variable `_lastThrust` keeps track of the direction of the last strong thrust (1 for bullish, -1 for bearish, 0 initially).
+
 ## Parameters
 
 The indicator has the following configurable parameters:
@@ -35,9 +37,16 @@ The indicator has the following configurable parameters:
 
 ## Outputs
 
-The indicator directly modifies the color of the bars on the chart. It also exposes two `IndicatorDataSeries`:
+The indicator directly modifies the color of the bars on the chart. It also exposes two `IndicatorDataSeries` that can be used by other indicators or cBots:
 
--   `ThrustCandle`: This series is declared but not explicitly assigned values within the provided `Calculate` method. It might be intended for future use or for other indicators to access thrust candle information.
--   `ThrustSwitch`: Similar to `ThrustCandle`, this series is declared but not assigned values in the current `Calculate` method.
+-   **`ThrustCandle`**: This series provides information about the type of candle identified:
+    -   `1`: Strong Bullish Thrust Candle.
+    -   `0`: Weak Bullish Candle.
+    -   `-1`: Strong Bearish Thrust Candle or Weak Bearish Candle. (Note: Weak bearish candles are also assigned -1. This might be an area for future refinement if a separate value for weak bearish is desired, e.g., 0 or a different negative number.)
 
-*Note: The `Initialize` method is currently empty but can be used for any setup logic if needed in the future.*
+-   **`ThrustSwitch`**: This series signals a change in the direction of strong thrusts:
+    -   `1`: A strong bullish thrust occurred, and the *previous* strong thrust was bearish.
+    -   `-1`: A strong bearish thrust occurred, and the *previous* strong thrust was bullish.
+    -   `0` (or no value): No switch in strong thrust direction occurred on this candle.
+
+*Note: The `Initialize` method now initializes an internal variable `_lastThrust` to 0.*
